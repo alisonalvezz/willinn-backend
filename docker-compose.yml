@@ -1,0 +1,36 @@
+services:
+  willinn-users-api:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    container_name: willinn-users-api
+    environment:
+      "ASPNETCORE_URLS": "https://+:8080;http://+:8081"
+      "ASPNETCORE_Kestrel__Certificates__Default__Password": "Password"
+      "ASPNETCORE_Kestrel__Certificates__Default__Path": "/etc/ssl/certs/my_ssl_pfx.pfx"
+    ports:
+      - "8081:8081"
+      - "8080:8080"
+    depends_on:
+      - willinn-users-db
+    volumes:
+      - /etc/ssl:/etc/ssl/certs:ro
+
+  willinn-users-db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    ports:
+      - "1433:1433"
+    container_name: willinn-users-db
+    environment:
+      SA_PASSWORD: "S3cur3P@ssW0rd!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - users-data:/var/opt/mssql
+
+volumes:
+  users-data: {}
+  api:
+    image: api
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
